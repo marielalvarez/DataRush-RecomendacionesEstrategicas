@@ -66,7 +66,7 @@ plt.xticks(rotation=45)
 plt.ylabel("Contado de días festivos")
 plt.show()
 
-# Obtener el número de días festivo por mes por país
+# Obtener el número de días festivo por mes por país (ayuda)
 festDayMonthQuery = """
 SELECT ADM_name, 
 COUNT(DISTINCT name) FILTER (WHERE Date LIKE '%-01-%') AS 'January',
@@ -84,7 +84,7 @@ COUNT(DISTINCT name) FILTER (WHERE Date LIKE '%-12-%') AS 'December'
 FROM holidays GROUP BY ADM_name;
 """
 
-""" festDayMonthResult = sqldf(festDayMonthQuery, locals())
+festDayMonthResult = sqldf(festDayMonthQuery, locals())
 
 festDayMonthResultMelted = festDayMonthResult.melt(
     id_vars="ADM_name",
@@ -102,7 +102,7 @@ sns.barplot(
 plt.xticks(rotation=45)
 plt.title("Distinct Holidays per Month by Country")
 plt.ylabel("Number of Distinct Holidays")
-plt.show() """
+plt.show()
 
 # Obtener el número de pasajeros totales por país
 passangerCountriesQuery = """
@@ -119,5 +119,47 @@ plt.xticks(rotation=90)  # Rotate country names for readability
 plt.title('Pasajeros Totales por País')
 plt.ylabel('Pasajeros totales')
 plt.xlabel('Country')
+plt.tight_layout()
+plt.show()
+
+# Obtener el número de pasajeros totales por país y Mes (ayuda)
+passangerCountriesMonthQuery = """
+SELECT Holidays.ADM_name, 
+SUM(CASE WHEN passengers.Total IS NOT NULL THEN passengers.Total_OS ELSE passengers.Total END) 
+FILTER (WHERE passengers.Month = '1') AS 'January Passengers',
+SUM(CASE WHEN passengers.Total IS NOT NULL THEN passengers.Total_OS ELSE passengers.Total END) 
+FILTER (WHERE passengers.Month = '2') AS 'February Passengers',
+SUM(CASE WHEN passengers.Total IS NOT NULL THEN passengers.Total_OS ELSE passengers.Total END) 
+FILTER (WHERE passengers.Month = '3') AS 'March Passengers',
+SUM(CASE WHEN passengers.Total IS NOT NULL THEN passengers.Total_OS ELSE passengers.Total END) 
+FILTER (WHERE passengers.Month = '4') AS 'April Passengers',
+SUM(CASE WHEN passengers.Total IS NOT NULL THEN passengers.Total_OS ELSE passengers.Total END) 
+FILTER (WHERE passengers.Month = '5') AS 'May Passengers',
+SUM(CASE WHEN passengers.Total IS NOT NULL THEN passengers.Total_OS ELSE passengers.Total END) 
+FILTER (WHERE passengers.Month = '6') AS 'June Passengers',
+SUM(CASE WHEN passengers.Total IS NOT NULL THEN passengers.Total_OS ELSE passengers.Total END) 
+FILTER (WHERE passengers.Month = '7') AS 'July Passengers',
+SUM(CASE WHEN passengers.Total IS NOT NULL THEN passengers.Total_OS ELSE passengers.Total END) 
+FILTER (WHERE passengers.Month = '8') AS 'August Passengers',
+SUM(CASE WHEN passengers.Total IS NOT NULL THEN passengers.Total_OS ELSE passengers.Total END) 
+FILTER (WHERE passengers.Month = '9') AS 'September Passengers',
+SUM(CASE WHEN passengers.Total IS NOT NULL THEN passengers.Total_OS ELSE passengers.Total END) 
+FILTER (WHERE passengers.Month = '10') AS 'October Passengers',
+SUM(CASE WHEN passengers.Total IS NOT NULL THEN passengers.Total_OS ELSE passengers.Total END) 
+FILTER (WHERE passengers.Month = '11') AS 'November Passengers',
+SUM(CASE WHEN passengers.Total IS NOT NULL THEN passengers.Total_OS ELSE passengers.Total END) 
+FILTER (WHERE passengers.Month = '12') AS 'December Passengers'
+FROM passengers INNER JOIN holidays ON holidays.ISO3 = passengers.ISO3 
+GROUP BY Holidays.ADM_name;
+"""
+
+passangerCountriesMonthResult = sqldf(passangerCountriesMonthQuery, locals())
+
+passangerCountriesMonthResult.set_index('ADM_name', inplace=True)
+passangerCountriesMonthResult.plot(kind='bar', stacked=True, figsize=(14,7))
+plt.ylabel('Pasajeros')
+plt.xlabel('País')
+plt.title('Pasajeros Mensuales')
+plt.xticks(rotation=90)
 plt.tight_layout()
 plt.show()
