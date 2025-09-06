@@ -38,48 +38,30 @@ df['holiday_count'] = df['holiday_count'].fillna(0)
 print(df.head(13))
 print(df.info())
 
+# Obtener el numero de días festivos por mes
+festDayQuery = """
+SELECT
+SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-01-%') AS January,
+SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-02-%') AS February,
+SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-03-%') AS March,
+SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-04-%') AS April,
+SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-05-%') AS May,
+SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-06-%') AS June,
+SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-07-%') AS July,
+SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-08-%') AS August,
+SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-09-%') AS September,
+SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-10-%') AS October,
+SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-11-%') AS November,
+SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-12-%') AS December
+FROM holidays
+"""
+festDayResult = sqldf(festDayQuery, locals())
+festDay_months = festDayResult.T.reset_index()
+festDay_months.columns = ["Month", "Holiday_Count"]
 
-
-
-
-# Total anual por país (lineas)
-annual = df.groupby(['ISO3', 'Year'])['Total_OS'].sum().reset_index()
-
-top10 = (
-    annual.groupby("ISO3")["Total_OS"].sum()
-    .sort_values(ascending=False)
-    .head(10)
-    .index
-)
-
-annual_top10 = annual[annual["ISO3"].isin(top10)]
-
-plt.figure(figsize=(12,9))
-sns.lineplot(data = annual_top10, x = "Year", y = "Total_OS", hue = "ISO3", markers = "o")
-
-plt.title("Evolución de pasajeros internacionales (Top 10 países)")
-plt.xlabel("Año")
-plt.ylabel("Total de pasajeros (OS)")
-plt.legend(title="País (ISO3)", bbox_to_anchor=(1.05, 1), loc='upper left')
-plt.show()
-
-
-
-
-#Promedio segun feriados (barra)
-df['feriado_binario'] = df['holiday_count'].apply(lambda x: "Con feriado" if x > 0 else "Sin feriado")
-
-avg_passengers = df.groupby('feriado_binario')['Total_OS'].mean()
-avg_passengers.plot(kind='bar', title="Promedio de pasajeros según feriados")
-plt.ylabel("Promedio pasajeros (Total_OS)")
-plt.show()
-
-
-
-
-#heatmap
-pivot = df.pivot_table(index="Month", columns="Year", values="Total_OS", aggfunc="mean")
 plt.figure(figsize=(12,6))
-sns.heatmap(pivot, cmap="YlGnBu", annot=False)
-plt.title("Estacionalidad de pasajeros (por mes/año)")
+sns.barplot(data=festDay_months, x="Month", y="Holiday_Count", palette="viridis")
+plt.title("Número de días festivos por mes")
+plt.xticks(rotation=45)
+plt.ylabel("Contado de días festivos")
 plt.show()
