@@ -1,6 +1,38 @@
 -- Obtener el número de días festivo por año por país
 SELECT ADM_name, COUNT(DISTINCT name) FROM Holidays GROUP BY ADM_name;
 
+-- Obtener el numero de días festivos por mes
+SELECT
+SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-01-%') AS 'January',
+SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-02-%') AS 'Ferbruary',
+SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-03-%') AS 'March',
+SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-04-%') AS 'April',
+SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-05-%') AS 'May',
+SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-06-%') AS 'June',
+SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-07-%') AS 'July',
+SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-08-%') AS 'August',
+SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-09-%') AS 'September',
+SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-10-%') AS 'October',
+SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-11-%') AS 'November',
+SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-12-%') AS 'December'
+FROM Holidays;
+
+-- Obtener el número de días festivo por mes por país
+SELECT ADM_name, 
+COUNT(DISTINCT name) FILTER (WHERE Date LIKE '%-01-%') AS 'January',
+COUNT(DISTINCT name) FILTER (WHERE Date LIKE '%-02-%') AS 'Ferbruary',
+COUNT(DISTINCT name) FILTER (WHERE Date LIKE '%-03-%') AS 'March',
+COUNT(DISTINCT name) FILTER (WHERE Date LIKE '%-04-%') AS 'April',
+COUNT(DISTINCT name) FILTER (WHERE Date LIKE '%-05-%') AS 'May',
+COUNT(DISTINCT name) FILTER (WHERE Date LIKE '%-06-%') AS 'June',
+COUNT(DISTINCT name) FILTER (WHERE Date LIKE '%-07-%') AS 'July',
+COUNT(DISTINCT name) FILTER (WHERE Date LIKE '%-08-%') AS 'August',
+COUNT(DISTINCT name) FILTER (WHERE Date LIKE '%-09-%') AS 'September',
+COUNT(DISTINCT name) FILTER (WHERE Date LIKE '%-10-%') AS 'October',
+COUNT(DISTINCT name) FILTER (WHERE Date LIKE '%-11-%') AS 'November',
+COUNT(DISTINCT name) FILTER (WHERE Date LIKE '%-12-%') AS 'December'
+FROM Holidays GROUP BY ADM_name;
+
 -- Obtener el número de días festivo por año por país divididos en tipo de día festivo
 SELECT ADM_name AS 'Country', COUNT(DISTINCT name) FILTER (WHERE Type = 'Public holiday') AS 'Public Holidays',
 COUNT(DISTINCT name) FILTER (WHERE Type = 'Special holiday') AS 'Special holiday',
@@ -49,5 +81,5 @@ FILTER (WHERE Monthly_Passengers.Month = '12') AS 'December Passangers'
 FROM Monthly_Passengers INNER JOIN Holidays ON Holidays.ISO3 = Monthly_Passengers.ISO3 
 GROUP BY Holidays.ADM_name;
 
-
+-- Obtener el número total de pasajeros por
 
