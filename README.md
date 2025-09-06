@@ -1,3 +1,6 @@
+# Video
+https://youtu.be/OWCH1-jz_UI
+
 # Del Insight a la Acción: Reto de Recomendaciones Estratégicas
 
 <p align="center">
