@@ -5,48 +5,66 @@ import seaborn as sns
 
 Holidays = pd.read_csv("C:/Users/santi/OneDrive/Escritorio/Equipo - Data Rush/DataRush-RecomendacionesEstrategicas/recursos/datos/global_holidays.csv")
 Monthly_Passengers = pd.read_csv("C:/Users/santi/OneDrive/Escritorio/Equipo - Data Rush/DataRush-RecomendacionesEstrategicas/recursos/datos/monthly_passengers.csv")
+passengers = pd.read_csv("C:/Users/santi/OneDrive/Escritorio/Equipo - Data Rush/DataRush-RecomendacionesEstrategicas/recursos/datos/monthly_passengers.csv")
 
+#fechas
+Holidays['Date'] = pd.to_datetime(Holidays['Date'])
+Holidays['Year'] = Holidays['Date'].dt.year
+Holidays['Month'] = Holidays['Date'].dt.month
 
+#fechas mensuales con pasajeros
+passengers['date'] = pd.to_datetime(
+    passengers['Year'].astype(str) + "-" + passengers['Month'].astype(str) + "-01"
+)
 
+#contar feriados
+holidays_monthly = (
+    Holidays.groupby(['ISO3', 'Year', 'Month'])
+    .size()
+    .reset_index(name='holiday_count')
+)
 
+#unir a pasajeros
+df = passengers.merge(
+    holidays_monthly,
+    on=['ISO3', 'Year', 'Month'],
+    how='left'
+)
 
+# Donde no hay feriados → 0
+df['holiday_count'] = df['holiday_count'].fillna(0)
 
+#Dataset final, imprimie las 1eras 13 lineas
+print(df.head(13))
+print(df.info())
 
+# Obtener el numero de días festivos por mes
+festDayQuery = """
+SELECT
+SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-01-%') AS January,
+SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-02-%') AS February,
+SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-03-%') AS March,
+SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-04-%') AS April,
+SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-05-%') AS May,
+SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-06-%') AS June,
+SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-07-%') AS July,
+SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-08-%') AS August,
+SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-09-%') AS September,
+SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-10-%') AS October,
+SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-11-%') AS November,
+SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-12-%') AS December
+FROM Holidays
+"""
+festDayResult = sqldf(festDayQuery, locals())
+festDay_months = festDayResult.T.reset_index()
+festDay_months.columns = ["Month", "Holiday_Count"]
 
-df_dias_festivos_por_mes = sqldf("""SELECT
-SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-01-%') AS 'January',
-SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-02-%') AS 'Ferbruary',
-SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-03-%') AS 'March',
-SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-04-%') AS 'April',
-SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-05-%') AS 'May',
-SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-06-%') AS 'June',
-SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-07-%') AS 'July',
-SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-08-%') AS 'August',
-SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-09-%') AS 'September',
-SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-10-%') AS 'October',
-SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-11-%') AS 'November',
-SUM(DISTINCT name) FILTER (WHERE Date LIKE '%-12-%') AS 'December'
-FROM Holidays;""")
-
-# Preparar los datos
-data_transposed = df_dias_festivos_por_mes.T  # Transponer
-data_transposed.columns = ['Holidays_Count']  # Renombrar columna
-data_transposed.index.name = 'Month'
-
-# Crear el gráfico de barras
-plt.figure(figsize=(12, 6))
-plt.bar(data_transposed.index, data_transposed['Holidays_Count'], color='skyblue', edgecolor='navy')
-plt.title('Días Festivos por Mes', fontsize=16, fontweight='bold')
-plt.xlabel('Mes', fontsize=12)
-plt.ylabel('Número de Días Festivos', fontsize=12)
+plt.figure(figsize=(12,6))
+sns.barplot(data=festDay_months, x="Month", y="Holiday_Count", palette="viridis")
+plt.title("Número de días festivos por mes")
 plt.xticks(rotation=45)
-plt.grid(axis='y', alpha=0.3)
-plt.tight_layout()
+plt.ylabel("Contado de días festivos")
 plt.show()
-
-
-
-
 
 
 
@@ -286,46 +304,3 @@ plt.xticks(rotation=45)
 plt.yticks(rotation=0)
 plt.tight_layout()
 plt.show()
-
-
-
-
-
-
-
-
-
-
-
-
-df_número_de_pasajeros_totales_por_país_y_Mes = sqldf("""
-SELECT Holidays.ADM_name, 
-SUM(CASE WHEN passengers.Total IS NOT NULL THEN passengers.Total_OS ELSE passengers.Total END) 
-FILTER (WHERE passengers.Month = '1') AS 'January Passengers',
-SUM(CASE WHEN passengers.Total IS NOT NULL THEN passengers.Total_OS ELSE passengers.Total END) 
-FILTER (WHERE passengers.Month = '2') AS 'February Passengers',
-SUM(CASE WHEN passengers.Total IS NOT NULL THEN passengers.Total_OS ELSE passengers.Total END) 
-FILTER (WHERE passengers.Month = '3') AS 'March Passengers',
-SUM(CASE WHEN passengers.Total IS NOT NULL THEN passengers.Total_OS ELSE passengers.Total END) 
-FILTER (WHERE passengers.Month = '4') AS 'April Passengers',
-SUM(CASE WHEN passengers.Total IS NOT NULL THEN passengers.Total_OS ELSE passengers.Total END) 
-FILTER (WHERE passengers.Month = '5') AS 'May Passengers',
-SUM(CASE WHEN passengers.Total IS NOT NULL THEN passengers.Total_OS ELSE passengers.Total END) 
-FILTER (WHERE passengers.Month = '6') AS 'June Passengers',
-SUM(CASE WHEN passengers.Total IS NOT NULL THEN passengers.Total_OS ELSE passengers.Total END) 
-FILTER (WHERE passengers.Month = '7') AS 'July Passengers',
-SUM(CASE WHEN passengers.Total IS NOT NULL THEN passengers.Total_OS ELSE passengers.Total END) 
-FILTER (WHERE passengers.Month = '8') AS 'August Passengers',
-SUM(CASE WHEN passengers.Total IS NOT NULL THEN passengers.Total_OS ELSE passengers.Total END) 
-FILTER (WHERE passengers.Month = '9') AS 'September Passengers',
-SUM(CASE WHEN passengers.Total IS NOT NULL THEN passengers.Total_OS ELSE passengers.Total END) 
-FILTER (WHERE passengers.Month = '10') AS 'October Passengers',
-SUM(CASE WHEN passengers.Total IS NOT NULL THEN passengers.Total_OS ELSE passengers.Total END) 
-FILTER (WHERE passengers.Month = '11') AS 'November Passengers',
-SUM(CASE WHEN passengers.Total IS NOT NULL THEN passengers.Total_OS ELSE passengers.Total END) 
-FILTER (WHERE passengers.Month = '12') AS 'December Passengers'
-FROM passengers INNER JOIN holidays ON holidays.ISO3 = passengers.ISO3 
-GROUP BY Holidays.ADM_name;
-""")
-print(df_número_de_pasajeros_totales_por_país_y_Mes)
-
