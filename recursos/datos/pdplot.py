@@ -37,15 +37,15 @@ df['holiday_count'] = df['holiday_count'].fillna(0)
 print(df.head(13))
 print(df.info())
 
-
+#df.to_csv("resultado_limpio.csv", index=False) ---->Para pasar a csv(excel tmb pero nomas cambias la palabra)
 
 
 
 # Total anual por país (lineas)
-annual = df.groupby(['ISO3', 'Year'])['Total_OS'].sum().reset_index()
+annual = df.groupby(['ISO3', 'Year'])['Total'].sum().reset_index()
 
 top10 = (
-    annual.groupby("ISO3")["Total_OS"].sum()
+    annual.groupby("ISO3")["Total"].sum()
     .sort_values(ascending=False)
     .head(10)
     .index
@@ -54,7 +54,7 @@ top10 = (
 annual_top10 = annual[annual["ISO3"].isin(top10)]
 
 plt.figure(figsize=(12,9))
-sns.lineplot(data = annual_top10, x = "Year", y = "Total_OS", hue = "ISO3", markers = "o")
+sns.lineplot(data = annual_top10, x = "Year", y = "Total", hue = "ISO3", markers = "o")
 
 plt.title("Evolución de pasajeros internacionales (Top 10 países)")
 plt.xlabel("Año")
@@ -68,17 +68,26 @@ plt.show()
 #Promedio segun feriados (barra)
 df['feriado_binario'] = df['holiday_count'].apply(lambda x: "Con feriado" if x > 0 else "Sin feriado")
 
-avg_passengers = df.groupby('feriado_binario')['Total_OS'].mean()
+avg_passengers = df.groupby('feriado_binario')['Total'].mean()
 avg_passengers.plot(kind='bar', title="Promedio de pasajeros según feriados")
-plt.ylabel("Promedio pasajeros (Total_OS)")
+plt.ylabel("Promedio pasajeros (Total)")
 plt.show()
 
 
 
 
 #heatmap
-pivot = df.pivot_table(index="Month", columns="Year", values="Total_OS", aggfunc="mean")
-plt.figure(figsize=(12,6))
-sns.heatmap(pivot, cmap="YlGnBu", annot=False)
-plt.title("Estacionalidad de pasajeros (por mes/año)")
+pivot = df.pivot_table(index="Month", columns="Year", values="Total", aggfunc="mean")
+#______________________________________________________________________________________________________________
+
+# plt.figure(figsize=(12,6))
+# sns.heatmap(pivot, cmap="YlGnBu", annot=False)
+# plt.title("Estacionalidad de pasajeros (por mes/año)")
+# plt.show()
+#___________________Se veia raro, supuse que era por la diferencia en los datos________________________________
+
+pivot_norm = pivot.div(pivot.sum(axis=0), axis=1)  # cada columna = 100%
+plt.figure(figsize=(14,7))
+sns.heatmap(pivot_norm, cmap="YlGnBu", annot=True, fmt=".0%")
+plt.title("Meses que concentran mas viajes dentro de cada año)")
 plt.show()
