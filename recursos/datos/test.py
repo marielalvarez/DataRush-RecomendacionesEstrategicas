@@ -83,7 +83,8 @@ COUNT(DISTINCT name) FILTER (WHERE Date LIKE '%-11-%') AS 'November',
 COUNT(DISTINCT name) FILTER (WHERE Date LIKE '%-12-%') AS 'December'
 FROM holidays GROUP BY ADM_name;
 """
-festDayMonthResult = sqldf(festDayMonthQuery, locals())
+
+""" festDayMonthResult = sqldf(festDayMonthQuery, locals())
 
 festDayMonthResultMelted = festDayMonthResult.melt(
     id_vars="ADM_name",
@@ -101,4 +102,22 @@ sns.barplot(
 plt.xticks(rotation=45)
 plt.title("Distinct Holidays per Month by Country")
 plt.ylabel("Number of Distinct Holidays")
+plt.show() """
+
+# Obtener el número de pasajeros totales por país
+passangerCountriesQuery = """
+SELECT holidays.ADM_name, 
+SUM(CASE WHEN passengers.Total IS NOT NULL THEN passengers.Total_OS ELSE passengers.Total END) AS 'Total_Passengers'
+FROM passengers INNER JOIN holidays ON holidays.ISO3 = passengers.ISO3 
+GROUP BY holidays.ADM_name;
+"""
+passangerCountriesResult = sqldf(passangerCountriesQuery, locals())
+
+plt.figure(figsize=(12,6))
+sns.barplot(data=passangerCountriesResult, x='ADM_name', y='Total_Passengers')
+plt.xticks(rotation=90)  # Rotate country names for readability
+plt.title('Pasajeros Totales por País')
+plt.ylabel('Pasajeros totales')
+plt.xlabel('Country')
+plt.tight_layout()
 plt.show()
