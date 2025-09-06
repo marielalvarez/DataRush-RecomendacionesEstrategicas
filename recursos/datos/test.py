@@ -1,10 +1,11 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from pandasql import sqldf
 
 countries = pd.read_csv("C:/Users/jpfdz/Documents/GitHub/DataRush-RecomendacionesEstrategicas/recursos/datos/countries.csv")
 holidays = pd.read_csv("C:/Users/jpfdz/Documents/GitHub/DataRush-RecomendacionesEstrategicas/recursos/datos/global_holidays.csv")
-passengers = pd.read_csv("C:/Users/jpfdz/Documents/GitHub/DataRush-RecomendacionesEstrategicas/recursos/datos/test.py")
+passengers = pd.read_csv("C:/Users/jpfdz/Documents/GitHub/DataRush-RecomendacionesEstrategicas/recursos/datos/monthly_passengers.csv")
 
 #fechas
 holidays['Date'] = pd.to_datetime(holidays['Date'])
