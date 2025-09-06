@@ -65,3 +65,40 @@ plt.title("Número de días festivos por mes")
 plt.xticks(rotation=45)
 plt.ylabel("Contado de días festivos")
 plt.show()
+
+# Obtener el número de días festivo por mes por país
+festDayMonthQuery = """
+SELECT ADM_name, 
+COUNT(DISTINCT name) FILTER (WHERE Date LIKE '%-01-%') AS 'January',
+COUNT(DISTINCT name) FILTER (WHERE Date LIKE '%-02-%') AS 'Ferbruary',
+COUNT(DISTINCT name) FILTER (WHERE Date LIKE '%-03-%') AS 'March',
+COUNT(DISTINCT name) FILTER (WHERE Date LIKE '%-04-%') AS 'April',
+COUNT(DISTINCT name) FILTER (WHERE Date LIKE '%-05-%') AS 'May',
+COUNT(DISTINCT name) FILTER (WHERE Date LIKE '%-06-%') AS 'June',
+COUNT(DISTINCT name) FILTER (WHERE Date LIKE '%-07-%') AS 'July',
+COUNT(DISTINCT name) FILTER (WHERE Date LIKE '%-08-%') AS 'August',
+COUNT(DISTINCT name) FILTER (WHERE Date LIKE '%-09-%') AS 'September',
+COUNT(DISTINCT name) FILTER (WHERE Date LIKE '%-10-%') AS 'October',
+COUNT(DISTINCT name) FILTER (WHERE Date LIKE '%-11-%') AS 'November',
+COUNT(DISTINCT name) FILTER (WHERE Date LIKE '%-12-%') AS 'December'
+FROM holidays GROUP BY ADM_name;
+"""
+festDayMonthResult = sqldf(festDayMonthQuery, locals())
+
+festDayMonthResultMelted = festDayMonthResult.melt(
+    id_vars="ADM_name",
+    var_name="Month",
+    value_name="Holiday_Count"
+)
+
+plt.figure(figsize=(14,7))
+sns.barplot(
+    data=festDayMonthResultMelted,
+    x="Month", 
+    y="Holiday_Count", 
+    hue="ADM_name"
+)
+plt.xticks(rotation=45)
+plt.title("Distinct Holidays per Month by Country")
+plt.ylabel("Number of Distinct Holidays")
+plt.show()
